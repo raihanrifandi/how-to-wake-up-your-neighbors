@@ -4,13 +4,80 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <ncurses/ncurses.h>
+#include <fstream>
 using namespace std;
 
-void header(){
+// game banner
+void header(string filename){    
+	ifstream myfile ("header.txt");
+	string generate = "";
+	if(myfile.is_open()){
+			while(getline(myfile, generate)){
+			mvprintw(20,40, generate) << endl;
+			}myfile.close();
+	}else {
+		cout << "Banner is not Displayed";
+	}
 	
 }
 
+void game_over(bool gameOver=false) {
+	initscr();
+	mvprintw(20, 40,"  ___   _   __  __ ___    _____   _____ ___");
+	mvprintw(21, 40," / __| /_\\ |  \\/  | __|  / _ \\ \\ / / __| _ \\");
+	mvprintw(22, 40,"| (_ |/ _ \\| |\\/| | _|  | (_) \\ V /| _||   /");
+	mvprintw(23, 40," \\___/_/ \\_\\_|  |_|___|  \\___/ \\_/ |___|_|_\\");
+	mvprintw(26,50,"TRY AGAIN ( Y / N )");
+	refresh();
+	getch();
+	endwin();
+}
+
 void aboutUs(){
+	
+	
+}
+
+void help(){
+initscr();
+mvprintw(20,40,",---,---,---,---,---,---,---,---,---,---,---,---,---,-------,");
+mvprintw(21,40,"|1/2| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0 | + | ' | <-    |");
+mvprintw(22,40,"|---'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-----|");
+mvprintw(23,40,"| ->| | Q | W | E | R | T | Y | U | I | O | P | ] | ^ |     |");
+mvprintw(24,40,"|-----',--',--',--',--',--',--',--',--',--',--',--',--'|    |");
+mvprintw(25,40,"| Caps | A | S | D | F | G | H | J | K | L |   | [ | * |    |");
+mvprintw(26,40,"|----,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'---'----|");
+mvprintw(27,40,"|    | < | Z | X | C | V | B | N | M | , | . | - |          |");
+mvprintw(28,40,"|----'-,-',--'--,'---'---'---'---'---'---'-,-'---',--,------|");
+mvprintw(29,40,"| ctrl |  | alt |                          |altgr |  | ctrl |");
+mvprintw(30,40,"'------'  '-----'--------------------------'------'  '------'");
+
+}
+
+
+void keyboardInput()
+{
+	initscr();
+    // declare variable
+    char ch;
+    printf("Enter key ESC to exit \n");
+    // define infinite loop for taking keys
+    while (1) {
+        if (kbhit) {
+            // fetch typed character into ch
+            ch = getch();
+            if ((int)ch == 27)
+            	game_over(true);
+                // when esc button is pressed, then it will exit from loop
+                break;
+            printf("%c", ch);
+        }
+    }
+}
+
+void score(){
+	
+	int getScore=0;
 	
 	
 }
@@ -28,23 +95,6 @@ void gotoxy(int x, int y) // Main Menu Highlighter
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),c);
 }
 
-void game_over() {
-	initscr();
-	mvprintw(20, 40,"  ___   _   __  __ ___    _____   _____ ___");
-	mvprintw(21, 40," / __| /_\\ |  \\/  | __|  / _ \\ \\ / / __| _ \\");
-	mvprintw(22, 40,"| (_ |/ _ \\| |\\/| | _|  | (_) \\ V /| _||   /");
-	mvprintw(23, 40," \\___/_/ \\_\\_|  |_|___|  \\___/ \\_/ |___|_|_\\");
-	mvprintw(26,50,"TRY AGAIN ( Y / N )");
-	refresh();
-	getch();
-	endwin();
-}
-
-void score(){
-	
-	
-}
-
 void main_menu()
 {
 	system("cls");
@@ -54,19 +104,19 @@ void main_menu()
 
     for(int i=0;;)
     {
-    	gotoxy(50,5);
+    	gotoxy(50,15);
         color(Set[0]);
         cout<<"1. Play";
 
-        gotoxy(50,6);
+        gotoxy(50,16);
         color(Set[1]);
         cout<<"2. Score";
 
-        gotoxy(50,7);
+        gotoxy(50,17);
         color(Set[2]);
         cout<<"3. Help";
 
-        gotoxy(50,8);
+        gotoxy(50,18);
         color(Set[3]);
         cout<<"4. About Us";
 
@@ -86,7 +136,7 @@ void main_menu()
         {
             if(counter == 1)
             {
-            
+            	keyboardInput();
             }
             if(counter == 2)
             {
@@ -110,7 +160,7 @@ void main_menu()
 
         if(counter == 1)
         {
-            Set[0] = 12;
+            Set[0] = 11;
         }
         if(counter == 2)
         {
@@ -118,15 +168,20 @@ void main_menu()
         }
         if(counter == 3)
         {
-            Set[2] = 12;
+            Set[2] = 13;
         }
         if(counter == 4)
         {
-            Set[3] = 12;
+            Set[3] = 14;
         }
     }
 }
 
 int main () {
-	main_menu();
+	string filename = "header.txt";
+	header(filename);
+	help();
+
+	
+	return 0;
 }
