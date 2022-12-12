@@ -5,122 +5,228 @@
 #include <stdlib.h> 
 #include <ncurses/ncurses.h>
 #include <fstream>
+#include <time.h>
 using namespace std;
 
-// game banner
-void header(string filename){    
-	ifstream myfile ("header.txt");
-	string generate = "";
-	if(myfile.is_open()){
-			while(getline(myfile, generate)){
-			mvprintw(20,40, generate) << endl;
-			}myfile.close();
-	}else {
-		cout << "Banner is not Displayed";
-	}
-	
+// Global variables
+#define SCREEN_WIDTH 90
+#define SCREEN_HEIGHT 26
+#define WIN_WIDTH 70 
+
+HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE); 
+COORD c;
+
+char keys[10];	
+int keyPos[10][2];	
+int score = 0; 
+int hp = 10.0;
+
+void color(int color) // Main Menu Highlighter
+{
+    SetConsoleTextAttribute(hCon,color);
 }
 
-void game_over(bool gameOver=false) {
+void gotoxy(int x, int y) // Main Menu Highlighter
+{
+  
+    c.X=x;
+    c.Y=y;
+    SetConsoleCursorPosition(hCon,c);
+}
+
+void hidecursor(bool visible, DWORD size) {
+	if(size == 0)
+		size = 20;	
+	
+	CONSOLE_CURSOR_INFO lpCursor;	
+	lpCursor.bVisible = visible;
+	lpCursor.dwSize = size;
+	SetConsoleCursorInfo(hCon,&lpCursor);
+} 
+
+void drawBorder(){  
+	for(int i=0; i<SCREEN_WIDTH; i++){ 
+		gotoxy(i,SCREEN_HEIGHT); cout<<"|";
+	}
+	
+	for(int i=0; i<SCREEN_HEIGHT; i++){
+		gotoxy(0,i); cout<<"|";
+		gotoxy(SCREEN_WIDTH,i); cout<<"|";
+	}
+	for(int i=0; i<SCREEN_HEIGHT; i++){
+		gotoxy(WIN_WIDTH,i); cout<<"|";
+	}
+}
+
+void game_over() {
 	initscr();
 	mvprintw(20, 40,"  ___   _   __  __ ___    _____   _____ ___");
 	mvprintw(21, 40," / __| /_\\ |  \\/  | __|  / _ \\ \\ / / __| _ \\");
 	mvprintw(22, 40,"| (_ |/ _ \\| |\\/| | _|  | (_) \\ V /| _||   /");
 	mvprintw(23, 40," \\___/_/ \\_\\_|  |_|___|  \\___/ \\_/ |___|_|_\\");
-	mvprintw(26,50,"TRY AGAIN ( Y / N )");
+	mvprintw(26,50,"PRESS ANY KEY TO BACK TO MAIN MENU");
 	refresh();
 	getch();
 	endwin();
+	
+
 }
+
+void generator(int ind){
+	keys[ind] = 65+rand()%25;
+	keyPos[ind][0] = 2 + rand()%(WIN_WIDTH-2);
+	keyPos[ind][1] = 1;
+}
+void displayer(int ind){
+	if( keyPos[ind][0] != 0 ){
+		gotoxy(keyPos[ind][0], keyPos[ind][1]);   cout<<keys[ind];  
+	} 
+}
+void buttonPressed(int ind){
+	if( keyPos[ind][0] != 0 ){
+		gotoxy(keyPos[ind][0], keyPos[ind][1]);   cout<<" ";  
+	}
+}
+void reset(int ind){
+	buttonPressed(ind);
+	generator(ind);
+}
+
+void updateScore(){
+	gotoxy(WIN_WIDTH + 7, 5);cout<<"Score: "<<score<<endl;
+	
+}
+
+void healthPoint(){
+	gotoxy(WIN_WIDTH + 7, 6);cout<<"HP: "<<hp<<endl;
+}
+
+void play(){
+	score = 0;
+	hp = 10.0;
+	for(int i=0; i<10; i++){
+		keyPos[i][0] = keyPos[i][1] = 1;	
+	}
+	 
+	system("cls"); 
+	drawBorder(); 
+	updateScore();
+	healthPoint();
+	
+	for(int i=0; i<10; i++)
+		generator(i); 
+		
+	
+		while(1){
+		if(kbhit()){
+			char ch = _getch();
+			for(int i=0; i<10; i++){
+				if( ch == keys[i] || ch-32 == keys[i] ){
+					reset(i);
+					score++;
+					updateScore();
+				}
+			}
+			if(ch==27){ // when esc button is pressed, then it will exit from loop
+				break;
+			}
+		} 
+		
+		for(int i=0; i<10; i++)
+			displayer(i);  
+			
+		Sleep(250); 
+		
+		for(int i=0; i<10; i++){
+			buttonPressed(i);  
+			keyPos[i][1] += 1;
+			if( keyPos[i][1] > SCREEN_HEIGHT ){
+				reset(i);
+				hp--;
+				healthPoint();
+				if(hp<=1.0){
+				game_over();
+				return;
+				
+				
+			}
+		}
+	}
+}
+
+}
+
+
+// game banner
+void header(string filename){    
+	ifstream myfile ("header.txt");
+	string generate;
+	if(myfile.is_open()){
+			while(getline(myfile, generate)){
+			cout << generate << endl;
+			}myfile.close();
+	}else {
+		cout << "Banner is not Displayed";
+	}
+}
+
+void help(){
+system("cls");
+initscr();
+mvprintw(19,55, "CARA BERMAIN (TEKAN ESC UNTUK KEMBALI KE MENU)");
+mvprintw(20,55,",---,---,---,---,---,---,---,---,---,---,---,---,---,-------,");
+mvprintw(21,55,"|1/2| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0 | + | ' | <-    |");
+mvprintw(22,55,"|---'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-----|");
+mvprintw(23,55,"| ->| | Q | W | E | R | T | Y | U | I | O | P | ] | ^ |     |");
+mvprintw(24,55,"|-----',--',--',--',--',--',--',--',--',--',--',--',--'|    |");
+mvprintw(25,55,"| Caps | A | S | D | F | G | H | J | K | L |   | [ | * |    |");
+mvprintw(26,55,"|----,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'---'----|");
+mvprintw(27,55,"|    | < | Z | X | C | V | B | N | M | , | . | - |          |");
+mvprintw(28,55,"|----'-,-',--'--,'---'---'---'---'---'---'-,-'---',--,------|");
+mvprintw(29,55,"| ctrl |  | alt |                          |altgr |  | ctrl |");
+mvprintw(30,55,"'------'  '-----'--------------------------'------'  '------'");
+mvprintw(31,55,"1. Terdapat beberapa huruf acak yang muncul dari atas");
+mvprintw(32,55,"2. Tekan tombol pada keyboard anda untuk menghilangkan huruf tersebut");
+mvprintw(33,55,"3. Tepat ketika anda menekan tombol keyboard yang sesuai, anda akan mendapatkan skor");
+mvprintw(34,55,"4. Jangan sampai huruf tersebut menyentuh tanah atau nyawa anda akan berkurang");
+	getch();
+	refresh();
+	endwin();
+}
+
 
 void aboutUs(){
 	
 	
 }
 
-void help(){
-initscr();
-mvprintw(20,40,",---,---,---,---,---,---,---,---,---,---,---,---,---,-------,");
-mvprintw(21,40,"|1/2| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0 | + | ' | <-    |");
-mvprintw(22,40,"|---'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-----|");
-mvprintw(23,40,"| ->| | Q | W | E | R | T | Y | U | I | O | P | ] | ^ |     |");
-mvprintw(24,40,"|-----',--',--',--',--',--',--',--',--',--',--',--',--'|    |");
-mvprintw(25,40,"| Caps | A | S | D | F | G | H | J | K | L |   | [ | * |    |");
-mvprintw(26,40,"|----,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'---'----|");
-mvprintw(27,40,"|    | < | Z | X | C | V | B | N | M | , | . | - |          |");
-mvprintw(28,40,"|----'-,-',--'--,'---'---'---'---'---'---'-,-'---',--,------|");
-mvprintw(29,40,"| ctrl |  | alt |                          |altgr |  | ctrl |");
-mvprintw(30,40,"'------'  '-----'--------------------------'------'  '------'");
 
-}
-
-
-void keyboardInput()
+void main_menu(bool trigger = false)
 {
-	initscr();
-    // declare variable
-    char ch;
-    printf("Enter key ESC to exit \n");
-    // define infinite loop for taking keys
-    while (1) {
-        if (kbhit) {
-            // fetch typed character into ch
-            ch = getch();
-            if ((int)ch == 27)
-            	game_over(true);
-                // when esc button is pressed, then it will exit from loop
-                break;
-            printf("%c", ch);
-        }
-    }
-}
-
-void score(){
-	
-	int getScore=0;
-	
-	
-}
-
-void color(int color) // Main Menu Highlighter
-{
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),color);
-}
-
-void gotoxy(int x, int y) // Main Menu Highlighter
-{
-    COORD c;
-    c.X=x;
-    c.Y=y;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),c);
-}
-
-void main_menu()
-{
-	system("cls");
+	do{
     int Set[] = {7,7,7,7};
-    int counter = 3;
-    char key;
-
+    int counter = 3;   
+	char key;
+	
+    
+	
     for(int i=0;;)
     {
-    	gotoxy(50,15);
+    	gotoxy(75,45);
         color(Set[0]);
         cout<<"1. Play";
 
-        gotoxy(50,16);
+        gotoxy(75,46);
         color(Set[1]);
         cout<<"2. Score";
 
-        gotoxy(50,17);
+        gotoxy(75,47);
         color(Set[2]);
         cout<<"3. Help";
 
-        gotoxy(50,18);
+        gotoxy(75,48);
         color(Set[3]);
         cout<<"4. About Us";
-
-        key = _getch();
 
         key = _getch();
 
@@ -136,7 +242,7 @@ void main_menu()
         {
             if(counter == 1)
             {
-            	keyboardInput();
+            	play();
             }
             if(counter == 2)
             {
@@ -144,7 +250,7 @@ void main_menu()
             }
             if(counter == 3)
             {
-               
+               help();
             }
             if(counter == 4)
             {
@@ -175,13 +281,14 @@ void main_menu()
             Set[3] = 14;
         }
     }
+}while (trigger!=true);
 }
 
 int main () {
+	hidecursor(0,0); 
+	srand( (unsigned)time(NULL)); 
 	string filename = "header.txt";
 	header(filename);
-	help();
-
-	
+	main_menu();
 	return 0;
 }
