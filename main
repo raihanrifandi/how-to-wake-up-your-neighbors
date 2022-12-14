@@ -1,3 +1,12 @@
+/* 
+		 Kelompok 13
+  Raihan Rifandi (2217051043)
+  Ulfa Anisa	 (2217051040)
+  Leo Nardo	     (2217051142)
+*/
+
+// How to Wake Up Your Neighbors //
+// Project Game Mata Kuliah Dasar Dasar Pemograman //
 #include <iostream>
 #include <windows.h>
 #include <conio.h>
@@ -8,18 +17,32 @@
 #include <time.h>
 using namespace std;
 
-// Global variables
+// Global Variables                                           
 #define SCREEN_WIDTH 90
 #define SCREEN_HEIGHT 26
 #define WIN_WIDTH 70 
-
+                
 HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE); 
 COORD c;
 
 char keys[10];	
-int keyPos[10][2];	
+int keyPosition[10][2];	
 int score = 0; 
-int hp = 10.0;
+float hp = 0.10;
+
+void header(string filename){    
+	ifstream myfile ("header.txt");
+	string generate;
+	
+	if(myfile.is_open()){
+			while(getline(myfile, generate)){
+			cout << generate << endl;
+			}myfile.close();
+	}else {
+		cout << "Banner is not Displayed";
+	}
+}
+
 
 void color(int color) // Main Menu Highlighter
 {
@@ -28,7 +51,6 @@ void color(int color) // Main Menu Highlighter
 
 void gotoxy(int x, int y) // Main Menu Highlighter
 {
-  
     c.X=x;
     c.Y=y;
     SetConsoleCursorPosition(hCon,c);
@@ -46,7 +68,7 @@ void hidecursor(bool visible, DWORD size) {
 
 void drawBorder(){  
 	for(int i=0; i<SCREEN_WIDTH; i++){ 
-		gotoxy(i,SCREEN_HEIGHT); cout<<"|";
+		gotoxy(i,SCREEN_HEIGHT); cout<<"=";
 	}
 	
 	for(int i=0; i<SCREEN_HEIGHT; i++){
@@ -58,33 +80,19 @@ void drawBorder(){
 	}
 }
 
-void game_over() {
-	initscr();
-	mvprintw(20, 40,"  ___   _   __  __ ___    _____   _____ ___");
-	mvprintw(21, 40," / __| /_\\ |  \\/  | __|  / _ \\ \\ / / __| _ \\");
-	mvprintw(22, 40,"| (_ |/ _ \\| |\\/| | _|  | (_) \\ V /| _||   /");
-	mvprintw(23, 40," \\___/_/ \\_\\_|  |_|___|  \\___/ \\_/ |___|_|_\\");
-	mvprintw(26,50,"PRESS ANY KEY TO BACK TO MAIN MENU");
-	refresh();
-	getch();
-	endwin();
-	
-
-}
-
 void generator(int ind){
 	keys[ind] = 65+rand()%25;
-	keyPos[ind][0] = 2 + rand()%(WIN_WIDTH-2);
-	keyPos[ind][1] = 1;
+	keyPosition[ind][0] = 2 + rand()%(WIN_WIDTH-2);
+	keyPosition[ind][1] = 1;
 }
 void displayer(int ind){
-	if( keyPos[ind][0] != 0 ){
-		gotoxy(keyPos[ind][0], keyPos[ind][1]);   cout<<keys[ind];  
+	if( keyPosition[ind][0] != 0 ){
+		gotoxy(keyPosition[ind][0], keyPosition[ind][1]);   cout<<keys[ind];  
 	} 
 }
 void buttonPressed(int ind){
-	if( keyPos[ind][0] != 0 ){
-		gotoxy(keyPos[ind][0], keyPos[ind][1]);   cout<<" ";  
+	if( keyPosition[ind][0] != 0 ){
+		gotoxy(keyPosition[ind][0], keyPosition[ind][1]);   cout<<" ";  
 	}
 }
 void reset(int ind){
@@ -101,11 +109,25 @@ void healthPoint(){
 	gotoxy(WIN_WIDTH + 7, 6);cout<<"HP: "<<hp<<endl;
 }
 
+void game_over() {
+	system("cls"); 
+	initscr();
+	mvprintw(20, 55,"  ___   _   __  __ ___    _____   _____ ___");
+	mvprintw(21, 55," / __| /_\\ |  \\/  | __|  / _ \\ \\ / / __| _ \\");
+	mvprintw(22, 55,"| (_ |/ _ \\| |\\/| | _|  | (_) \\ V /| _||   /");
+	mvprintw(23, 55," \\___/_/ \\_\\_|  |_|___|  \\___/ \\_/ |___|_|_\\");
+	mvprintw(26,60, "PRESS ANY KEY TO BACK TO MAIN MENU") << score;
+	refresh();
+	getch();
+	endwin();
+
+}
+
 void play(){
 	score = 0;
 	hp = 10.0;
 	for(int i=0; i<10; i++){
-		keyPos[i][0] = keyPos[i][1] = 1;	
+		keyPosition[i][0] = keyPosition[i][1] = 1;	
 	}
 	 
 	system("cls"); 
@@ -139,8 +161,8 @@ void play(){
 		
 		for(int i=0; i<10; i++){
 			buttonPressed(i);  
-			keyPos[i][1] += 1;
-			if( keyPos[i][1] > SCREEN_HEIGHT ){
+			keyPosition[i][1] += 1;
+			if( keyPosition[i][1] > SCREEN_HEIGHT ){
 				reset(i);
 				hp--;
 				healthPoint();
@@ -156,34 +178,19 @@ void play(){
 
 }
 
-
-// game banner
-void header(string filename){    
-	ifstream myfile ("header.txt");
-	string generate;
-	if(myfile.is_open()){
-			while(getline(myfile, generate)){
-			cout << generate << endl;
-			}myfile.close();
-	}else {
-		cout << "Banner is not Displayed";
-	}
-}
-
 void help(){
-system("cls");
 initscr();
 mvprintw(19,55, "CARA BERMAIN (TEKAN ESC UNTUK KEMBALI KE MENU)");
 mvprintw(20,55,",---,---,---,---,---,---,---,---,---,---,---,---,---,-------,");
-mvprintw(21,55,"|1/2| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0 | + | ' | <-    |");
+mvprintw(21,55,"|ESC| 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 0 | + | ' | <-    |");
 mvprintw(22,55,"|---'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-----|");
-mvprintw(23,55,"| ->| | Q | W | E | R | T | Y | U | I | O | P | ] | ^ |     |");
+mvprintw(23,55,"| Tab | Q | W | E | R | T | Y | U | I | O | P | ] | ^ |     |");
 mvprintw(24,55,"|-----',--',--',--',--',--',--',--',--',--',--',--',--'|    |");
 mvprintw(25,55,"| Caps | A | S | D | F | G | H | J | K | L |   | [ | * |    |");
 mvprintw(26,55,"|----,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'-,-'---'----|");
-mvprintw(27,55,"|    | < | Z | X | C | V | B | N | M | , | . | - |          |");
+mvprintw(27,55,"|    | < | Z | X | C | V | B | N | M | , | . | - |     Shift|");
 mvprintw(28,55,"|----'-,-',--'--,'---'---'---'---'---'---'-,-'---',--,------|");
-mvprintw(29,55,"| ctrl |  | alt |                          |altgr |  | ctrl |");
+mvprintw(29,55,"| Ctrl |  | Alt |                          |altgr |  | Ctrl |");
 mvprintw(30,55,"'------'  '-----'--------------------------'------'  '------'");
 mvprintw(31,55,"1. Terdapat beberapa huruf acak yang muncul dari atas");
 mvprintw(32,55,"2. Tekan tombol pada keyboard anda untuk menghilangkan huruf tersebut");
@@ -194,47 +201,33 @@ mvprintw(34,55,"4. Jangan sampai huruf tersebut menyentuh tanah atau nyawa anda 
 	endwin();
 }
 
-
-void aboutUs(){
-	
-	
-}
-
-
-void main_menu(bool trigger = false)
+void main_menu()
 {
-	do{
     int Set[] = {7,7,7,7};
     int counter = 3;   
 	char key;
-	
-    
-	
-    for(int i=0;;)
+    while(1)
     {
+    	
     	gotoxy(75,45);
         color(Set[0]);
         cout<<"1. Play";
 
         gotoxy(75,46);
         color(Set[1]);
-        cout<<"2. Score";
+        cout<<"2. Help";
 
         gotoxy(75,47);
         color(Set[2]);
-        cout<<"3. Help";
-
-        gotoxy(75,48);
-        color(Set[3]);
-        cout<<"4. About Us";
+        cout<<"3. Quit";
 
         key = _getch();
 
-        if(key == 72 && (counter >=2 && counter <= 5))
+        if(key == 72 && (counter >=2 && counter <= 3))
         {
             counter--;
         }
-        if(key == 80 && (counter >=1 && counter <= 4))
+        if(key == 80 && (counter >=1 && counter <= 2))
         {
             counter++;
         }
@@ -242,27 +235,22 @@ void main_menu(bool trigger = false)
         {
             if(counter == 1)
             {
-            	play();
+               play();
             }
             if(counter == 2)
             {
-               
+               help();
             }
             if(counter == 3)
             {
-               help();
+               break;
             }
-            if(counter == 4)
-            {
             
-            }
         }
 
         Set[0] = 7;
         Set[1] = 7;
         Set[2] = 7;
-        Set[3] = 7;
-        Set[4] = 7;
 
         if(counter == 1)
         {
@@ -276,17 +264,12 @@ void main_menu(bool trigger = false)
         {
             Set[2] = 13;
         }
-        if(counter == 4)
-        {
-            Set[3] = 14;
-        }
     }
-}while (trigger!=true);
 }
 
 int main () {
-	hidecursor(0,0); 
-	srand( (unsigned)time(NULL)); 
+	hidecursor(0,0);
+	srand( (unsigned)time(NULL));
 	string filename = "header.txt";
 	header(filename);
 	main_menu();
